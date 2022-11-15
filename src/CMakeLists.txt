@@ -33,7 +33,12 @@ add_library(ThreadUtils
 	${ThreadUtils_SOURCES}
 )
 
+set_target_properties(ThreadUtils PROPERTIES PUBLIC_HEADER
+	"${ThreadUtils_HEADERS}"
+)
+
+message(${CMAKE_INSTALL_PREFIX})
+
 target_link_libraries(ThreadUtils
 	${ThreadUtils_LIBS}
 )
-
