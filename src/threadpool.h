@@ -32,10 +32,12 @@ namespace ThreadUtils
 		void start();
 		void stop();
 		bool poolRunning() { return _poolRunning; };
-	private:
-		void threadRunner();
 
-	private:
+	protected:
+		virtual void threadRunner();
+		virtual bool inputPredicate();
+
+	protected:
 		/// @brief Size of thread pool
 		uint32_t _numThreads;
 
@@ -52,7 +54,7 @@ namespace ThreadUtils
 		std::mutex _queueMutex;
 
 		/// @brief Condition variable to notify threads
-		std::condition_variable _cv;
+		std::condition_variable _inputCV;
 	};
 
 };

@@ -41,7 +41,7 @@ void Threadpool::push(AbstractRunnable *runnable)
 	lock.unlock();
 
 	// Notify threads of new data
-	_cv.notify_all();
+	_inputCV.notify_all();
 }
 
 /**
@@ -82,7 +82,7 @@ void Threadpool::stop()
 
 	// Set flag to false and notify threads
 	_poolRunning = false;
-	_cv.notify_all();
+	_inputCV.notify_all();
 
 	// Wait for thread to finish and delete
 	for (auto thread : _threads)
@@ -93,6 +93,16 @@ void Threadpool::stop()
 
 	// Clear array of threads
 	_threads.clear();
+}
+
+/**
+ * @brief Predicate dicating whether thread runner should perform action
+ *
+ * @return Condition that requires thread intervention
+ */
+bool Threadpool::inputPredicate()
+{
+	return !_queue.empty() || !poolRunning();
 }
 
 /**
@@ -117,9 +127,7 @@ void Threadpool::threadRunner()
 		}
 
 		// Wait for change in queue or pool status
-		_cv.wait(l, [&]() {
-			return !_queue.empty() || !poolRunning();
-		});
+		_inputCV.wait(l, [&](){ return inputPredicate(); });
 
 		// If pool killed
 		if (!poolRunning())
@@ -141,6 +149,9 @@ void Threadpool::threadRunner()
 
 		// Execute runnable
 		runnable->run();
+
+		// Delete runnable when done
+		delete runnable;
 	}
 }
 

@@ -1,11 +1,14 @@
 # Project
-project(ex_threadpool)
+project(ex_buffered_threadpool)
+
+# Include tracy
+include(${CMAKE_SOURCE_DIR}/cmake/tracy.cmake)
 
 # Compiler Options
 set(CMAKE_CXX_STANDARD 14)
 
 # Output
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/examples/threadpool)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/examples/buffered_threadpool)
 
 # Packages
 

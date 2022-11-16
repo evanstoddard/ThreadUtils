@@ -16,27 +16,11 @@
 #include <unistd.h>
 #include <deque>
 
-void SieveOfEratosthenes(int64_t n, int index)
+void runner(int32_t n, int index)
 {
-	std::cout << "Starting: " << index << std::endl;
-    // Create a boolean array "prime[0..n]" and initialize
-    // all entries it as true. A value in prime[i] will
-    // finally be false if i is Not a prime, else true.
-    std::vector<bool> prime(n+1, true);
-
-    for (int64_t p=2; p*p<=n; p++)
-    {
-        // If prime[p] is not changed, then it is a prime
-        if (prime[p] == true)
-        {
-            // Update all multiples of p
-            for (int64_t i=p*2; i<=n; i += p)
-                prime[i] = false;
-        }
-    }
-	std::cout << "Done" << std::endl;
-	//std::cout << std::this_thread::get_id() << " Done" << std::endl;
-
+	std::cout << "Thread [" << std::this_thread::get_id() << "]: Sleeping for: " << index << " seconds." << std::endl;
+	sleep(index);
+	std::cout << "Thread [" << std::this_thread::get_id() << "]: Finished " << index << std::endl;
 }
 
 std::mutex gFinishedMutex;
@@ -72,7 +56,7 @@ int main(int argc, char **argv)
 	for (int64_t i = 0; i < 10; i++)
 	{
 		// Create runnable
-		ThreadUtils::Runnable<void(int64_t, int)> *runnable = new ThreadUtils::Runnable<void(int64_t, int)>(SieveOfEratosthenes, 99999999, i);
+		ThreadUtils::Runnable<void(int64_t, int)> *runnable = new ThreadUtils::Runnable<void(int64_t, int)>(runner, rand(), i);
 		threadpool.push(runnable);
 	}
 	threadpool.start();

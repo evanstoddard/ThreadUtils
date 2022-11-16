@@ -24,12 +24,19 @@ namespace ThreadUtils
 	class AbstractRunnable
 	{
 	public:
+		virtual ~AbstractRunnable() {};
 		virtual void run() = 0;
 	};
 
 	template <typename T>
 	class Runnable{};
 
+	/**
+	 * @brief Runnable object to handle execution of functor with ...params
+	 *
+	 * @tparam ReturnType Return type of functor
+	 * @tparam Params Type of arguments for functor
+	 */
 	template <typename ReturnType, typename... Params>
 	class Runnable<ReturnType(Params...)> : public AbstractRunnable
 	{
@@ -40,9 +47,15 @@ namespace ThreadUtils
 		 * @param f Functor to run
 		 * @param params Parameters to pass to functor
 		 */
-		explicit Runnable(std::function<void(Params...)> f, Params... params) :
+		explicit Runnable(const std::function<void(Params...)> &&f, Params... params) :
 			_function(std::move(f)),
 			_params(params...) {}
+
+		/**
+		 * @brief Destroy the Runnable object
+		 *
+		 */
+		virtual ~Runnable() {}
 
 		/**
 		 * @brief Execute task
