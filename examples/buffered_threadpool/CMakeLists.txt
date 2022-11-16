@@ -1,9 +1,6 @@
 # Project
 project(ex_buffered_threadpool)
 
-# Include tracy
-include(${CMAKE_SOURCE_DIR}/cmake/tracy.cmake)
-
 # Compiler Options
 set(CMAKE_CXX_STANDARD 14)
 
