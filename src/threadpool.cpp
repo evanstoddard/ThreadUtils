@@ -25,11 +25,11 @@ Threadpool::Threadpool(uint32_t numThreads) :
 }
 
 /**
- * @brief Push runnable onto runnable queue
+ * @brief Enqueue runnable onto runnable queue
  *
  * @param runnable Runnable object
  */
-void Threadpool::push(AbstractRunnable *runnable)
+void Threadpool::enqueue(AbstractRunnable *runnable)
 {
 	// Take lock
 	std::unique_lock<std::mutex> lock(_queueMutex);
@@ -64,7 +64,6 @@ void Threadpool::start()
 	{
 		std::thread *thread = new std::thread(&Threadpool::threadRunner, this);
 		_threads.push_back(thread);
-		thread->detach();
 	}
 }
 

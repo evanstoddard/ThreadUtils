@@ -9,18 +9,21 @@
  */
 
 #include <iostream>
+#include <iomanip>
 #include "runnable.h"
 #include "threadpool.h"
-#include <chrono>
-#include <thread>
 #include <unistd.h>
-#include <deque>
 
-void runner(int32_t n, int index)
+/**
+ * @brief Function to run in runnable
+ *
+ * @param n
+ * @param index
+ */
+void runInRunnable(int index)
 {
-	std::cout << "Thread [" << std::this_thread::get_id() << "]: Sleeping for: " << index << " seconds." << std::endl;
-	sleep(index);
-	std::cout << "Thread [" << std::this_thread::get_id() << "]: Finished " << index << std::endl;
+	sleep(1);
+	std::cout << "Thread [0x" << std::hex << std::this_thread::get_id() << "]: Finished Runnable " << index << std::endl;
 }
 
 std::mutex gFinishedMutex;
@@ -42,7 +45,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	// Read number of threads to run from command line
+	//Read number of threads to run from command line
 	int numThreads = ::atoi(argv[1]);
 	if (numThreads < 1)
 	{
@@ -53,26 +56,25 @@ int main(int argc, char **argv)
 	ThreadUtils::Threadpool threadpool(numThreads);
 
 	// Create runnable objects for example
-	for (int64_t i = 0; i < 10; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		// Create runnable
-		ThreadUtils::Runnable<void(int64_t, int)> *runnable = new ThreadUtils::Runnable<void(int64_t, int)>(runner, rand(), i);
-		threadpool.push(runnable);
+		threadpool.enqueue_new(runInRunnable, i);
 	}
 	threadpool.start();
 
 	// Create runnable to notify us when we're done
-	ThreadUtils::Runnable<void(void)> *finalStage = new ThreadUtils::Runnable<void(void)>([&]() {
+	ThreadUtils::Runnable<> *finalStage = new ThreadUtils::Runnable<>([&]() {
 		gFinishedConditionVariable.notify_one();
 	});
-	threadpool.push(finalStage);
+	threadpool.enqueue(finalStage);
 
 	// Wait for thread pool to complete
 	std::unique_lock<std::mutex> l(gFinishedMutex);
 	gFinishedConditionVariable.wait(l);
 
-	// Stop threads
-	exit(0);
+	// Stop threadpool
+	threadpool.stop();
 
 	return 0;
 }

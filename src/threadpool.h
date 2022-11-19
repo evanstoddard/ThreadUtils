@@ -19,6 +19,7 @@
 #include <condition_variable>
 #include <atomic>
 #include "runnable.h"
+#include <iostream>
 
 namespace ThreadUtils
 {
@@ -28,7 +29,15 @@ namespace ThreadUtils
 	public:
 		explicit Threadpool(uint32_t numThreads);
 		~Threadpool();
-		void push(AbstractRunnable *runnable);
+
+		void enqueue(AbstractRunnable *runnable);
+
+		template <typename _Callable, typename ...Params>
+		void enqueue_new(_Callable &&functor, Params ...args)
+		{
+			enqueue(new Runnable<Params...>(std::move(functor), args...));
+		}
+
 		void start();
 		void stop();
 		bool poolRunning() { return _poolRunning; };

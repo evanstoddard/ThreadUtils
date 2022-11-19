@@ -28,17 +28,14 @@ namespace ThreadUtils
 		virtual void run() = 0;
 	};
 
-	template <typename T>
-	class Runnable{};
-
 	/**
 	 * @brief Runnable object to handle execution of functor with ...params
 	 *
 	 * @tparam ReturnType Return type of functor
 	 * @tparam Params Type of arguments for functor
 	 */
-	template <typename ReturnType, typename... Params>
-	class Runnable<ReturnType(Params...)> : public AbstractRunnable
+	template <typename ...Params>
+	class Runnable : public AbstractRunnable
 	{
 	public:
 		/**
@@ -69,16 +66,16 @@ namespace ThreadUtils
 
 	private:
 		template<typename F, typename Tuple, size_t ...S >
-		ReturnType appleTupleImpl(F&& fn, Tuple&& t, std::index_sequence<S...>)
+		void appleTupleImpl(F&& fn, Tuple&& t, std::index_sequence<S...>)
 		{
-			return std::forward<F>(fn)(std::get<S>(std::forward<Tuple>(t))...);
+			std::forward<F>(fn)(std::get<S>(std::forward<Tuple>(t))...);
 		}
 
 		template<typename F, typename Tuple>
-		ReturnType callWithParams(F&& fn, Tuple&& t)
+		void callWithParams(F&& fn, Tuple&& t)
 		{
 			std::size_t constexpr tSize = std::tuple_size<typename std::remove_reference<Tuple>::type>::value;
-			return appleTupleImpl
+			appleTupleImpl
 			(
 				std::forward<F>(fn),
 				std::forward<Tuple>(t),
