@@ -20,7 +20,7 @@ set(${PROJECT_NAME}_HEADERS
 
 # Libraries
 set(${PROJECT_NAME}_LIBS
-	ThreadUtils
+	pthread
 )
 
 # Include Paths
@@ -29,7 +29,7 @@ include_directories(
 )
 
 # Targets
-add_executable(${PROJECT_NAME} EXCLUDE_FROM_ALL
+add_executable(${PROJECT_NAME}
 	${${PROJECT_NAME}_SOURCES}
 )
 
