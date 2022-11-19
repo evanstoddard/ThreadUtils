@@ -11,7 +11,7 @@
 #ifndef BUFFEREDTHREADPOOL_H_
 #define BUFFEREDTHREADPOOL_H_
 
-#include "threadpool.h"
+#include "threadpool.hpp"
 
 namespace ThreadUtils
 {

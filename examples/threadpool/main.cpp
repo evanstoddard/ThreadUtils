@@ -10,8 +10,8 @@
 
 #include <iostream>
 #include <iomanip>
-#include "runnable.h"
-#include "threadpool.h"
+#include "runnable.hpp"
+#include "threadpool.hpp"
 #include <unistd.h>
 
 /**
