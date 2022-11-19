@@ -27,8 +27,7 @@ void FirstStage(int64_t i)
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 	// Create runnable for next stage
-	ThreadUtils::Runnable<void(int64_t)> *runnable = new ThreadUtils::Runnable<void(int64_t)>(SecondStage, i);
-	threadpool->push(runnable);
+	threadpool->enqueue_new(SecondStage, i);
 }
 
 void SecondStage(int64_t i)
@@ -71,7 +70,7 @@ int main(int argc, char **argv)
 	std::thread producerThread([&]() {
 		for (int i = 0; i < 5; i++)
 		{
-			ThreadUtils::Runnable<void(int64_t)> *runnable = new ThreadUtils::Runnable<void(int64_t)>(FirstStage, i);
+			ThreadUtils::Runnable<int64_t> *runnable = new ThreadUtils::Runnable<int64_t>(FirstStage, i);
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 			threadpool->feedQueue(runnable);
 		}
@@ -87,5 +86,6 @@ int main(int argc, char **argv)
 
 	producerThread.join();
 	consumerThread.join();
+	threadpool->stop();
 	return 0;
 }
