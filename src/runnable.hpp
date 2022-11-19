@@ -44,8 +44,8 @@ namespace ThreadUtils
 		 * @param f Functor to run
 		 * @param params Parameters to pass to functor
 		 */
-		explicit Runnable(const std::function<void(Params...)> &&f, Params... params) :
-			_function(std::move(f)),
+		explicit Runnable(const std::function<void(Params...)> &&func, Params... params) :
+			_function(std::move(func)),
 			_params(params...) {}
 
 		/**
@@ -77,7 +77,7 @@ namespace ThreadUtils
 			std::size_t constexpr tSize = std::tuple_size<typename std::remove_reference<Tuple>::type>::value;
 			appleTupleImpl
 			(
-				std::forward<F>(fn),
+				std::forward<F>(func),
 				std::forward<Tuple>(t),
 				std::make_index_sequence<tSize>()
 			);

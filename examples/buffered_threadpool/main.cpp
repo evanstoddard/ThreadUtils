@@ -9,8 +9,8 @@
  */
 
 #include <iostream>
-#include "runnable.h"
-#include "bufferedthreadpool.h"
+#include "runnable.hpp"
+#include "bufferedthreadpool.hpp"
 #include <chrono>
 #include <thread>
 #include <unistd.h>
