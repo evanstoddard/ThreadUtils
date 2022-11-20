@@ -37,7 +37,7 @@ void SecondStage(int64_t i)
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 	// Push to output buffer
-	threadpool->feedOutputBuffer(i);
+	threadpool->feedOutputQueue(i);
 }
 
 /**
