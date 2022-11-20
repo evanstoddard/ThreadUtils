@@ -236,7 +236,6 @@ namespace ThreadUtils
 							BufferedThreadpool<T>::_activeProcesses--;
 							popCount++;
 
-							BufferedThreadpool<T>::_outputSignal.notify_all();
 						}
 					}
 				}

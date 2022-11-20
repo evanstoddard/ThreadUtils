@@ -17,8 +17,6 @@
 #include <deque>
 
 ThreadUtils::BufferedThreadpool<int64_t> *threadpool;
-void FirstStage(int64_t i);
-void SecondStage(int64_t i);
 
 void FirstStage(int64_t i)
 {
