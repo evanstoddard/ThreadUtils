@@ -36,7 +36,7 @@ namespace ThreadUtils
 		 * @param runnable Runnable
 		 * @param tag Tag
 		 */
-		void feedQueue(AbstractRunnable *runnable, T tag)
+		void feedQueue(AbstractRunnable *runnable, TagType tag)
 		{
 			// Take input mutex
 			std::unique_lock<std::mutex> l(BufferedThreadpool<T>::_queueMutex);
@@ -46,6 +46,10 @@ namespace ThreadUtils
 			container.tag = tag;
 			BufferedThreadpool<T>::_inputQueue.emplace_back(runnable);
 			_inputContainers.emplace_back(container);
+
+			std::unique_lock<std::mutex> ol(BufferedThreadpool<T>::_outputMutex);
+			_outputOrder.emplace_back(tag);
+			ol.unlock();
 
 			// Release mutex and signal condition variable
 			l.unlock();
@@ -123,7 +127,6 @@ namespace ThreadUtils
 							container = _inputContainers.front();
 							container.slotAvailable = false;
 							_inputContainers.pop_front();
-							_outputOrder.push_back(container.tag);
 							break;
 						}
 					}
@@ -163,7 +166,6 @@ namespace ThreadUtils
 		 */
 		void updateOutputBuffer(T value, TagType tag, bool valid)
 		{
-			std::cout << "Update called: " << value << " " << tag << " " << valid << std::endl;
 			// Take lock
 			std::unique_lock<std::mutex> l(BufferedThreadpool<T>::_outputMutex);
 
@@ -201,16 +203,13 @@ namespace ThreadUtils
 				// Add value to output queue if valid
 				if (valid)
 				{
-					std::cout << "Container val: " << matchingContainer.value << " value: " << value << std::endl;
 					BufferedThreadpool<T>::_outputBuffer.emplace_back(matchingContainer.value);
 				}
 
 				// Decrement active process counter and pop output order queue
 				BufferedThreadpool<T>::_activeProcesses--;
 				_outputOrder.pop_front();
-			}
-			else
-			{
+
 				// Check remaining values in output containers
 				int popCount = 0;
 				for (auto &outTag : _outputOrder)
@@ -227,7 +226,6 @@ namespace ThreadUtils
 							// Add value to output queue if available
 							if (container.valid)
 							{
-								std::cout << "Container val: " << matchingContainer.value << " value: " << value << std::endl;
 								BufferedThreadpool<T>::_outputBuffer.emplace_back(container.value);
 							}
 
@@ -237,6 +235,8 @@ namespace ThreadUtils
 							// Decrement active process counter and pop output order queue
 							BufferedThreadpool<T>::_activeProcesses--;
 							popCount++;
+
+							BufferedThreadpool<T>::_outputSignal.notify_all();
 						}
 					}
 				}

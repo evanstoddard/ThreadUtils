@@ -17,29 +17,21 @@
 #include <unistd.h>
 #include <deque>
 
-ThreadUtils::OrderedBufferedThreadpool<int, int> *threadpool;
+ThreadUtils::OrderedBufferedThreadpool<std::string, int> *threadpool;
 
-void threadFunc(int delay, int tag, bool valid)
+void threadFunc(int delay, const std::string val, int tag, bool valid)
 {
-
-	//std::cout << "Thread [0x" << std::hex << std::this_thread::get_id() << "]: "
-	//		  << "Started processing tag " << tag << "." << std::endl;
-
 	// Delay
 	std::this_thread::sleep_for(std::chrono::seconds(delay));
 
 	// Complete thread
 	if (!valid)
 	{
-	//	std::cout << "Thread [0x" << std::hex << std::this_thread::get_id() << "]: "
-	//		  << "Invalidated tag " << tag << "." << std::endl;
-			  threadpool->invalidateTag(tag);
+		threadpool->invalidateTag(tag);
 	}
 	else
 	{
-		//std::cout << "Thread [0x" << std::hex << std::this_thread::get_id() << "]: "
-		//	  << "Finished tag " << tag << "." << std::endl;
-		threadpool->feedOutputQueue(tag, tag);
+		threadpool->feedOutputQueue(val, tag);
 	}
 
 }
@@ -68,25 +60,41 @@ int main(int argc, char **argv)
 	}
 
 	// Create threadpool
-	threadpool = new ThreadUtils::OrderedBufferedThreadpool<int, int>(numThreads);
+	threadpool = new ThreadUtils::OrderedBufferedThreadpool<std::string, int>(numThreads);
 
 	using namespace ThreadUtils;
 
-	for (int i = 0; i < 3; i++)
-	{
-		// Create runnable
-		Runnable<int, int, bool> *runnable = new Runnable<int, int, bool>(threadFunc, 3 - i, i, i != 1);
-		threadpool->feedQueue(runnable, i);
-	}
+	int delay[] = {5, 3, 4, 1};
+	std::string val[] = {"This", "is", "NOT", "awesome!"};
+	bool valid[] = {true, true, false, true};
 
 	// Start threadpool
 	threadpool->start();
 
-	int sum = 0;
-	while(true)
+	// Feed input queue
+	for (int i = 0; i < 4; i++)
 	{
-		(void)threadpool->fetchFromBuffer();
+		threadpool->feedQueue(new Runnable<int, const std::string, int, bool>
+		(
+			threadFunc,
+			delay[i],
+			val[i],
+			i,
+			valid[i]
+		), i);
 	}
 
-	return sum;
+	while(true)
+	{
+		std::string val = threadpool->fetchFromBuffer();
+		std::cout << "Val: " << val << std::endl;
+
+		if (val == "awesome!")
+		{
+			threadpool->stop();
+			break;
+		}
+	}
+
+	return 0;
 }
