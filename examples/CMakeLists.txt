@@ -1,3 +1,4 @@
 # Add Subdirectories
 add_subdirectory(threadpool)
 add_subdirectory(buffered_threadpool)
+add_subdirectory(ordered_buffered_threadpool)

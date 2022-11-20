@@ -26,8 +26,8 @@ namespace ThreadUtils
 		 * @param numThreads Number of worker threads to spin up
 		 */
 		explicit BufferedThreadpool(uint32_t numThreads) :
-			_activeProcesses(0),
-			Threadpool(numThreads)
+			Threadpool(numThreads),
+			_activeProcesses(0)
 		{
 
 		}
@@ -82,11 +82,11 @@ namespace ThreadUtils
 		}
 
 		/**
-		 * @brief Feed output buffer
+		 * @brief Feed output queue
 		 *
-		 * @param value Value to feed buffer
+		 * @param value Value to feed queue
 		 */
-		void feedOutputBuffer(T value)
+		void feedOutputQueue(T value)
 		{
 			// Take lock
 			std::unique_lock<std::mutex> l(_outputMutex);

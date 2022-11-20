@@ -87,7 +87,6 @@ namespace ThreadUtils
 		std::function<void(Params...)> _function;
 		std::tuple<Params...> _params;
 	};
-
 };
 
 #endif /* RUNNABLE_H_ */
