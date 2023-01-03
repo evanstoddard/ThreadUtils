@@ -131,8 +131,6 @@ namespace ThreadUtils
 						}
 					}
 
-					// Release output lock
-					ol.unlock();
 				}
 				else if (!BufferedThreadpool<T>::_queue.empty())
 				{
@@ -144,7 +142,10 @@ namespace ThreadUtils
 					l.unlock();
 					continue;
 				}
-
+				
+				// Release output lock
+				ol.unlock();
+				
 				// Release lock
 				l.unlock();
 
