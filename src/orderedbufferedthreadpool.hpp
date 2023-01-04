@@ -140,12 +140,13 @@ namespace ThreadUtils
 				else
 				{
 					l.unlock();
+					ol.unlock();
 					continue;
 				}
-				
+
 				// Release output lock
 				ol.unlock();
-				
+
 				// Release lock
 				l.unlock();
 
@@ -212,14 +213,15 @@ namespace ThreadUtils
 				_outputOrder.pop_front();
 
 				// Check remaining values in output containers
-				int popCount = 0;
-				for (auto &outTag : _outputOrder)
+				while(!_outputOrder.empty())
 				{
+					bool found = false;
+
 					// Iterate through containers
 					for (auto &container : _outputContainers)
 					{
 						if (
-							container.tag == outTag &&
+							container.tag == _outputOrder.front() &&
 							container.finishedProcessing &&
 							!container.slotAvailable
 						)
@@ -235,16 +237,16 @@ namespace ThreadUtils
 
 							// Decrement active process counter and pop output order queue
 							BufferedThreadpool<T>::_activeProcesses--;
-							popCount++;
-
+							_outputOrder.pop_front();
+							found = true;
+							break;
 						}
 					}
-				}
 
-				// Pop off front of output order
-				for (int i = 0; i < popCount; i++)
-				{
-					_outputOrder.pop_front();
+					if (!found)
+					{
+						break;
+					}
 				}
 			}
 

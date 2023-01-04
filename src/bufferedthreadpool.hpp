@@ -67,6 +67,7 @@ namespace ThreadUtils
 			// If pool killed return empty type
 			if (!_poolRunning)
 			{
+				l.unlock();
 				return T();
 			}
 
