@@ -26,7 +26,8 @@ namespace ThreadUtils
 		 */
 		explicit OrderedBufferedThreadpool(uint32_t numThreads) :
 			BufferedThreadpool<T>(numThreads),
-			_outputContainers(numThreads)
+			_outputContainers(numThreads),
+			_maxInputQueueSize(-1)
 		{
 		}
 
@@ -40,6 +41,12 @@ namespace ThreadUtils
 		{
 			// Take input mutex
 			std::unique_lock<std::mutex> l(BufferedThreadpool<T>::_queueMutex);
+
+			if (_inputQueue.size() >= _maxInputQueueSize)
+			{
+				l.unlock();
+				return;
+			}
 
 			// Push runnable and process container
 			Container container;
@@ -76,6 +83,16 @@ namespace ThreadUtils
 		void invalidateTag(TagType tag)
 		{
 			updateOutputBuffer(T(), tag, false);
+		}
+
+		/**
+		 * @brief Set the Max Input Queue Size object
+		 *
+		 * @param maxSize Max size of queue (-1 unlimited)
+		 */
+		void setMaxInputQueueSize(uint64_t maxSize)
+		{
+			_maxInputQueueSize = maxSize;
 		}
 
 	protected:
@@ -285,6 +302,8 @@ namespace ThreadUtils
 
 		/// @brief Order of output
 		std::deque<TagType> _outputOrder;
+
+		uint64_t _maxInputQueueSize;
 
 	};
 };
