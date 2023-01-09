@@ -42,7 +42,7 @@ namespace ThreadUtils
 			// Take input mutex
 			std::unique_lock<std::mutex> l(BufferedThreadpool<T>::_queueMutex);
 
-			if (_inputQueue.size() >= _maxInputQueueSize)
+			if (BufferedThreadpool<T>::_inputQueue.size() >= _maxInputQueueSize)
 			{
 				l.unlock();
 				return;
